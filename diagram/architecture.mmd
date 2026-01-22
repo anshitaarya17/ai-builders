@@ -1,0 +1,13 @@
+flowchart LR
+    A[Enterprise Data Sources] --> B[Connectors]
+    A --> C[Access Controls]
+    B --> D[Normalizer + Chunker]
+    D --> E[Metadata + Lineage]
+    E --> F[Index Store]
+    F --> G[Retriever]
+    G --> H[Reranker]
+    H --> I[Answer Composer]
+    I --> J[Citations + Provenance]
+    C --> G
+    C --> I
+    J --> K[UI / API]

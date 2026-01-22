@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Builders - Enterprise Search MVP</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <div class="badge">AI Builders</div>
+        <h1>Enterprise Intelligent Search</h1>
+        <p class="subtext">
+          Search across enterprise data sources and get grounded answers with
+          citations.
+        </p>
+        <div class="pill-row">
+          <span class="pill">Docs</span>
+          <span class="pill">Tickets</span>
+          <span class="pill">Contracts</span>
+          <span class="pill">Directory</span>
+        </div>
+      </header>
+
+      <section class="search-panel">
+        <label class="label" for="query">Ask a question</label>
+        <div class="search-row">
+          <input
+            id="query"
+            placeholder="Try: incident response, refund timelines, who manages security"
+          />
+          <button id="searchBtn">Search</button>
+        </div>
+        <div class="example-row">
+          <button class="example" data-q="incident response">
+            incident response
+          </button>
+          <button class="example" data-q="data retention">
+            data retention
+          </button>
+          <button class="example" data-q="support director">support director</button>
+          <button class="example" data-q="refunds">refunds</button>
+        </div>
+      </section>
+
+      <section class="results-panel">
+        <div class="results-meta">
+          <span id="resultsCount">No results yet</span>
+          <span id="resultsQuery" class="muted"></span>
+        </div>
+        <div id="results" class="results"></div>
+      </section>
+      <footer class="footer">MVP demo • local index • citations preserved</footer>
+    </main>
+    <script>
+      const button = document.getElementById("searchBtn");
+      const queryInput = document.getElementById("query");
+      const resultsEl = document.getElementById("results");
+      const resultsCount = document.getElementById("resultsCount");
+      const resultsQuery = document.getElementById("resultsQuery");
+
+      async function runSearch(forcedQuery) {
+        const query = queryInput.value.trim();
+        const finalQuery = forcedQuery ?? query;
+        resultsEl.innerHTML = "";
+        if (!finalQuery) {
+          resultsEl.innerHTML = "<p class='hint'>Enter a question to search.</p>";
+          resultsCount.textContent = "No results yet";
+          resultsQuery.textContent = "";
+          return;
+        }
+        resultsCount.textContent = "Searching...";
+        resultsQuery.textContent = `"${finalQuery}"`;
+        const response = await fetch(
+          `/search?q=${encodeURIComponent(finalQuery)}`
+        );
+        const data = await response.json();
+        if (!data.results.length) {
+          resultsEl.innerHTML = "<p class='hint'>No matches found.</p>";
+          resultsCount.textContent = "0 results";
+          return;
+        }
+        const cards = data.results
+          .map(
+            (item) => `
+          <div class="card">
+            <div class="score">score ${item.score}</div>
+            <div class="snippet">${item.snippet}</div>
+            <div class="citation">
+              <span class="chip">${item.source}</span>
+              <span class="chip">chunk ${item.chunk_id}</span>
+              <span class="chip">${item.type.toUpperCase()}</span>
+            </div>
+          </div>`
+          )
+          .join("");
+        resultsEl.innerHTML = cards;
+        resultsCount.textContent = `${data.results.length} results`;
+        resultsQuery.textContent = `"${finalQuery}"`;
+      }
+
+      button.addEventListener("click", runSearch);
+      queryInput.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          runSearch();
+        }
+      });
+      document.querySelectorAll(".example").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const q = btn.dataset.q;
+          queryInput.value = q;
+          runSearch(q);
+        });
+      });
+    </script>
+  </body>
+</html>
