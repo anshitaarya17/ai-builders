@@ -4,6 +4,8 @@ A working Python prototype of an **enterprise-grade intelligent search system** 
 
 **Works offline with TF-IDF. Upgrades to OpenAI semantic search if API key is available.**
 
+Demo Video: A short walkthrough demonstrating the working UI, architecture diagram, and core implementation (included in the repository).
+
 ---
 
 ## What Problem Does This Solve?
@@ -93,7 +95,7 @@ The server auto-detects OpenAI and upgrades search quality.
 
 ### 4. Professional UI
 - Formatted structured data (not raw CSV)
-- Icons for data types (👤 People, 📄 Contracts, 🎫 Tickets)
+- Icons for data types (People, Contracts, Tickets)
 - Match percentage scores
 - GPT-4o answer toggle (when available)
 
@@ -211,11 +213,11 @@ if use_llm and OPENAI_AVAILABLE:
 ## Submission
 
 This submission includes:
-- ✅ Working prototype (runs offline)
-- ✅ Multi-source ingestion (CSV + Markdown)
-- ✅ Semantic search (TF-IDF + optional OpenAI)
-- ✅ Context-aware intent routing
-- ✅ Citations with source + relevance
-- ✅ GPT-4o answers
-- ✅ Professional modern UI
-- ✅ Architecture diagram
+- Working prototype (runs offline)
+- Multi-source ingestion (CSV + Markdown)
+- Semantic search (TF-IDF + optional OpenAI)
+- Context-aware intent routing
+- Citations with source + relevance
+- GPT-4o answers
+- Professional modern UI
+- Architecture diagram
