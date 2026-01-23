@@ -1,8 +1,8 @@
 flowchart TB
-    A[Frontend<br/>Streamlit Chat UI] -->|Query| B[Orchestrator<br/>Intent + Planner]
+    A[Frontend<br/>Chat / Search UI] -->|Query| B[Orchestrator Agent<br/>Planner + Router]
     B --> C[Retrieval Agent<br/>Vector + Filter]
     B --> D[Tool/Data Agent<br/>APIs / DBs]
-    C --> E[Vector Store<br/>Chroma]
+    C --> E[Vector Store<br/>Embeddings]
     D --> F[Live Data Tools<br/>Jira, Git, SQL]
     E --> G[Reasoning Agent<br/>LLM + RAG]
     F --> G
