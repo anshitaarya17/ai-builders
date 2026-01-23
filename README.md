@@ -216,6 +216,6 @@ This submission includes:
 - ✅ Semantic search (TF-IDF + optional OpenAI)
 - ✅ Context-aware intent routing
 - ✅ Citations with source + relevance
-- ✅ Optional GPT-4o answers
+- ✅ GPT-4o answers
 - ✅ Professional modern UI
 - ✅ Architecture diagram
