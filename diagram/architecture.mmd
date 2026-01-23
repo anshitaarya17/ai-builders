@@ -1,13 +1,9 @@
-flowchart LR
-    A[Enterprise Data Sources] --> B[Connectors]
-    A --> C[Access Controls]
-    B --> D[Normalizer + Chunker]
-    D --> E[Metadata + Lineage]
-    E --> F[Index Store]
-    F --> G[Retriever]
-    G --> H[Reranker]
-    H --> I[Answer Composer]
-    I --> J[Citations + Provenance]
-    C --> G
-    C --> I
-    J --> K[UI / API]
+flowchart TB
+    A[Frontend<br/>Streamlit Chat UI] -->|Query| B[Orchestrator<br/>Intent + Planner]
+    B --> C[Retrieval Agent<br/>Vector + Filter]
+    B --> D[Tool/Data Agent<br/>APIs / DBs]
+    C --> E[Vector Store<br/>Chroma]
+    D --> F[Live Data Tools<br/>Jira, Git, SQL]
+    E --> G[Reasoning Agent<br/>LLM + RAG]
+    F --> G
+    G --> H[Answer + Citations]

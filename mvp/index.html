@@ -8,96 +8,174 @@
   </head>
   <body>
     <main class="container">
-      <header class="hero">
-        <div class="badge">AI Builders</div>
-        <h1>Enterprise Intelligent Search</h1>
+      <div class="hero">
+        <h1>🔍 AI Builders - Enterprise Intelligent Search</h1>
         <p class="subtext">
-          Search across enterprise data sources and get grounded answers with
-          citations.
+          Context-aware search across enterprise data with citations.
         </p>
-        <div class="pill-row">
-          <span class="pill">Docs</span>
-          <span class="pill">Tickets</span>
-          <span class="pill">Contracts</span>
-          <span class="pill">Directory</span>
-        </div>
-      </header>
+      </div>
 
-      <section class="search-panel">
-        <label class="label" for="query">Ask a question</label>
+      <div class="search-section">
         <div class="search-row">
-          <input
-            id="query"
-            placeholder="Try: incident response, refund timelines, who manages security"
-          />
+          <input id="query" placeholder="Ask anything about your enterprise data..." />
           <button id="searchBtn">Search</button>
         </div>
-        <div class="example-row">
-          <button class="example" data-q="incident response">
-            incident response
-          </button>
-          <button class="example" data-q="data retention">
-            data retention
-          </button>
-          <button class="example" data-q="support director">support director</button>
-          <button class="example" data-q="refunds">refunds</button>
-        </div>
-      </section>
 
-      <section class="results-panel">
-        <div class="results-meta">
-          <span id="resultsCount">No results yet</span>
-          <span id="resultsQuery" class="muted"></span>
+        <div class="options-row">
+          <label class="toggle">
+            <input type="checkbox" id="llmToggle" />
+            <span class="toggle-label">Enable GPT-4o Answers</span>
+            <span id="llmStatus" class="status-badge"></span>
+          </label>
+          <span id="embeddingStatus" class="status-badge"></span>
         </div>
-        <div id="results" class="results"></div>
-      </section>
-      <footer class="footer">MVP demo • local index • citations preserved</footer>
+
+        <div class="examples">
+          <span class="examples-label">Try:</span>
+          <button class="chip" data-query="SMB contracts">SMB contracts</button>
+          <button class="chip" data-query="Support Director">Support Director</button>
+          <button class="chip" data-query="ACCT-1191">ACCT-1191</button>
+          <button class="chip" data-query="Security team">Security team</button>
+        </div>
+      </div>
+
+      <div id="answer-section" class="answer-section hidden">
+        <div class="answer-header">
+          <span class="answer-icon">💡</span>
+          <span>GPT-4o Answer</span>
+        </div>
+        <div id="answer-content" class="answer-content"></div>
+      </div>
+
+      <div id="results-header" class="results-header hidden">
+        <span id="results-count"></span>
+        <span id="intent-badge" class="intent-badge"></span>
+      </div>
+
+      <div id="results" class="results"></div>
+
+      <footer class="footer">
+        AI Builders Enterprise Search MVP
+      </footer>
     </main>
+
     <script>
       const button = document.getElementById("searchBtn");
       const queryInput = document.getElementById("query");
       const resultsEl = document.getElementById("results");
-      const resultsCount = document.getElementById("resultsCount");
-      const resultsQuery = document.getElementById("resultsQuery");
+      const resultsHeader = document.getElementById("results-header");
+      const resultsCount = document.getElementById("results-count");
+      const intentBadge = document.getElementById("intent-badge");
+      const answerSection = document.getElementById("answer-section");
+      const answerContent = document.getElementById("answer-content");
+      const llmToggle = document.getElementById("llmToggle");
+      const llmStatus = document.getElementById("llmStatus");
+      const embeddingStatus = document.getElementById("embeddingStatus");
+      const chips = document.querySelectorAll(".chip");
 
-      async function runSearch(forcedQuery) {
+      chips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+          queryInput.value = chip.dataset.query;
+          runSearch();
+        });
+      });
+
+      async function runSearch() {
         const query = queryInput.value.trim();
-        const finalQuery = forcedQuery ?? query;
         resultsEl.innerHTML = "";
-        if (!finalQuery) {
+        resultsHeader.classList.add("hidden");
+        answerSection.classList.add("hidden");
+        
+        if (!query) {
           resultsEl.innerHTML = "<p class='hint'>Enter a question to search.</p>";
-          resultsCount.textContent = "No results yet";
-          resultsQuery.textContent = "";
           return;
         }
-        resultsCount.textContent = "Searching...";
-        resultsQuery.textContent = `"${finalQuery}"`;
-        const response = await fetch(
-          `/search?q=${encodeURIComponent(finalQuery)}`
-        );
-        const data = await response.json();
-        if (!data.results.length) {
-          resultsEl.innerHTML = "<p class='hint'>No matches found.</p>";
-          resultsCount.textContent = "0 results";
-          return;
+        
+        resultsEl.innerHTML = "<p class='hint'>Searching...</p>";
+        
+        const useLLM = llmToggle.checked;
+        const url = `/search?q=${encodeURIComponent(query)}${useLLM ? '&llm=true' : ''}`;
+        
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          
+          // Update status badges
+          if (data.llm_available) {
+            llmStatus.textContent = "Available";
+            llmStatus.className = "status-badge available";
+            llmToggle.disabled = false;
+          } else {
+            llmStatus.textContent = "Unavailable";
+            llmStatus.className = "status-badge unavailable";
+            llmToggle.disabled = true;
+            llmToggle.checked = false;
+          }
+          
+          if (data.embeddings_available) {
+            embeddingStatus.textContent = "Semantic Search";
+            embeddingStatus.className = "status-badge available";
+          } else {
+            embeddingStatus.textContent = "TF-IDF Search";
+            embeddingStatus.className = "status-badge neutral";
+          }
+          
+          // Show answer if available
+          if (data.answer) {
+            answerContent.innerHTML = formatAnswer(data.answer);
+            answerSection.classList.remove("hidden");
+          }
+          
+          if (data.results.length > 0) {
+            resultsCount.textContent = `${data.results.length} results`;
+            intentBadge.textContent = data.intent || "semantic";
+            resultsHeader.classList.remove("hidden");
+          }
+          
+          if (!data.results.length) {
+            resultsEl.innerHTML = "<p class='hint'>No matches found.</p>";
+            return;
+          }
+          
+          const cards = data.results
+            .map(
+              (item, idx) => `
+            <div class="card">
+              <div class="card-header">
+                <span class="citation">[${idx + 1}]</span>
+                <span class="source-icon">${item.icon || '📄'}</span>
+                <span class="source">${item.source}</span>
+                <span class="type-badge ${item.type}">${item.type === 'record' ? 'Record' : 'Document'}</span>
+                <span class="score">${(item.score * 100).toFixed(0)}% match</span>
+              </div>
+              <div class="snippet">${formatSnippet(item.snippet)}</div>
+            </div>`
+            )
+            .join("");
+          resultsEl.innerHTML = cards;
+        } catch (error) {
+          resultsEl.innerHTML = `<p class='hint error'>Error: ${error.message}</p>`;
         }
-        const cards = data.results
-          .map(
-            (item) => `
-          <div class="card">
-            <div class="score">score ${item.score}</div>
-            <div class="snippet">${item.snippet}</div>
-            <div class="citation">
-              <span class="chip">${item.source}</span>
-              <span class="chip">chunk ${item.chunk_id}</span>
-              <span class="chip">${item.type.toUpperCase()}</span>
-            </div>
-          </div>`
-          )
-          .join("");
-        resultsEl.innerHTML = cards;
-        resultsCount.textContent = `${data.results.length} results`;
-        resultsQuery.textContent = `"${finalQuery}"`;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function formatSnippet(text) {
+        // Escape HTML first
+        let safe = escapeHtml(text);
+        // Convert **Label:** to styled spans
+        safe = safe.replace(/\*\*([^*]+):\*\*/g, '<span class="field-label">$1:</span>');
+        // Convert | separators to styled dividers
+        safe = safe.replace(/ \| /g, '<span class="field-sep"></span>');
+        return safe;
+      }
+
+      function formatAnswer(answer) {
+        return escapeHtml(answer).replace(/\[(\d+)\]/g, '<span class="cite">[$1]</span>');
       }
 
       button.addEventListener("click", runSearch);
@@ -105,13 +183,6 @@
         if (event.key === "Enter") {
           runSearch();
         }
-      });
-      document.querySelectorAll(".example").forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const q = btn.dataset.q;
-          queryInput.value = q;
-          runSearch(q);
-        });
       });
     </script>
   </body>

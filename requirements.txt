@@ -1,0 +1,7 @@
+# Core (works offline with just these)
+# No external dependencies required for basic TF-IDF search
+
+# Optional - for OpenAI semantic search & GPT-4o answers
+openai>=1.0.0
+httpx>=0.25.0
+numpy>=1.24.0
