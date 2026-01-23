@@ -8,17 +8,11 @@ A working Python prototype of an **enterprise-grade intelligent search system** 
 
 ## What Problem Does This Solve?
 
-Traditional enterprise search is broken:
-- ❌ No understanding of *who* is asking
-- ❌ No reasoning across tools/sources
-- ❌ Weak or no citations
-- ❌ No freshness or permissions awareness
-
 This MVP demonstrates **agentic RAG** that:
-- ✅ Connects multiple enterprise data sources
-- ✅ Understands context and intent
-- ✅ Provides grounded answers with citations
-- ✅ Uses semantic search + optional LLM reasoning
+- Connects multiple enterprise data sources
+- Understands context and intent
+- Provides grounded answers with citations
+- Uses semantic search + optional LLM reasoning
 
 ---
 
@@ -225,9 +219,3 @@ This submission includes:
 - ✅ Optional GPT-4o answers
 - ✅ Professional modern UI
 - ✅ Architecture diagram
-
----
-
-## License
-
-MIT
